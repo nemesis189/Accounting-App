@@ -12,7 +12,6 @@ from frappe import _
 def execute(filters=None, filter_by_date=True):
 	print(filters)
 	assets = get_data_to_display('Asset','Debit',filters)
-	print("AAASSSSEEEETTTTTSSS        :",assets)
 	liabilities = get_data_to_display('Liability','Credit',filters)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(assets, liabilities)
@@ -30,15 +29,12 @@ def execute(filters=None, filter_by_date=True):
 	report_summary = get_report_summary(assets, liabilities, provisional_profit_loss, total_credit)
 	chart = get_chart(assets, liabilities, columns)
 
-	print('FINAL DATA:', data)
 	return columns,data,[],chart, report_summary
 
 def get_data_to_display(root_type, balance_must_be,filters):
 	accounts = get_accounts(root_type)
 	gle_by_accounts = get_gle_accounts(filters,root_type)
 	accounts, accounts_by_name, parent_child_accs = filter_parent_child(accounts)
-
-	# print('GLEEEEEEEEEE',gle_by_accounts)
 
 	calculate_values(accounts_by_name,gle_by_accounts,filters)
 
@@ -49,14 +45,11 @@ def get_data_to_display(root_type, balance_must_be,filters):
 		output = add_total_row(output, root_type, balance_must_be)
 		output = parent_child_arrangement(output)
 		output = bold_and_currency_formatting(output)
-	# print('^^^&&&&&&&&&&&^^^^^^^&&&&^^^^^^^^&&&&&&&***********',output)
 	return output
 
 
 def calculate_values(accounts_by_name, gle_by_accounts,filters):
-	# print('subinnnnnnnnnnnnnnnnnnnnnnnnn',accounts_by_name)
 	abn = accounts_by_name
-	# print('$$$$$$$$$$$$$$ CALCULATE VALUES @@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 	for entries in gle_by_accounts.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry['account'])
@@ -65,13 +58,8 @@ def calculate_values(accounts_by_name, gle_by_accounts,filters):
 					_("Could not retrieve information for {0}.").format(entry['account']), title="Error",
 					raise_exception=1
 				)
-			# print(entry['posting_date'],datetime.strptime(filters['to_date'],'%Y-%m-%d').date(),entry['posting_date'] , datetime.strptime(filters['to_date'],'%Y-%m-%d').date())
 			if (entry['posting_date'] <= datetime.strptime(filters['to_date'],'%Y-%m-%d').date()) and (entry['posting_date'] >= datetime.strptime(filters['from_date'],'%Y-%m-%d').date()):
-				# print('^^^^^^^^^^^^^^^^^^^inside calculating IF function')
 				d['acc_balance'] = d.get('acc_balance', 0.0) + flt(entry['debit_amount']) - flt(entry['credit_amount'])
-				# print(d)
-	# print(gle_by_accounts)
-	# return abn
 
 				
 def prepare_data_row(accounts, balance_must_be,filters):
@@ -79,7 +67,6 @@ def prepare_data_row(accounts, balance_must_be,filters):
 
 	for acc in accounts:
 		# add to output
-		# print('ACCOUNTS IN ROW',acc)
 		has_value = False
 		total = 0
 		row = frappe._dict({
@@ -115,9 +102,7 @@ def add_total_row(output, root_type, balance_must_be):
 	}
 
 	for row in output:
-		# print('$$$$$$$$$$$$$$ ADD TOTAL ROW @@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 		if  row.get("parent_account") == 'e5c3e1d569':
-			# for period in period_list:
 			total_row.setdefault('acc_balance', 0.0)
 			total_row['acc_balance'] += row.get('acc_balance', 0.0)
 			row['acc_balance'] = row.get('acc_balance', 0.0)
@@ -131,14 +116,11 @@ def add_total_row(output, root_type, balance_must_be):
 		output.append(total_row)
 		# blank row after Total
 		output.append({})
-	# print('SORTEDDDDDDDDDDDD',output)
 	return output
 
 
 
 def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False):
-	# print('$$$$$$$$$$$$$$ filterrrrrrrrrrrrrr @@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-	# print(data)
 	data = sorted(data, key = lambda k:k['indent'], reverse = True)
 	data_with_value = []
 	for _ in range(len(data)):
@@ -147,34 +129,22 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 					d.get("account") not in [x['account'] for x in data_with_value] :
 				data_with_value.append(d)
 			else:
-				# show group with zero balance, if there are balances against child
 				children = [child['name'] for child in parent_children_map.get(d.get("account")) or []]
 				children_dict_list = [child for child in data if child['account'] in children]
-				# print(d.get('account'))
-				# print(children)
 				if children:
 					for row in data:
 						row['currency'] = 'INR'
 						if row.get("account") in children and row.get("has_value"):
-							# print(d.get('account'),[x['account'] for x in data_with_value])
 							if d.get('account') not in [x['account'] for x in data_with_value]:
-								print('PAAAARRRRRRREEEENNNNNNTTTT',d.get('account'))
-								print('CHILDRENNNNNN  :', children_dict_list, [flt(x.get('total')) for x in children_dict_list])
 								
 								data_with_value.append(d)
 								d['has_value'] = True
 								d['acc_balance'] += sum([flt(x.get('acc_balance')) for x in children_dict_list])
 								if 'currency' not in d:
 									d['currency'] = 'INR'
-								print('CHILLLLLDDDDDDDD TOTALLL',flt(row.get('total')))
-								print('PAAAARRRRRRREEEENNNNNNTTTT new total    ',d.get('acc_balance'))
 
-								# d['total'] += flt(row.get('total'))
 							break
 
-				# print('NEW DAtaaaaa: ',data)
-	# print(data_with_value)
-	# data_with_value.append({})
 	return data_with_value
 
 
@@ -298,10 +268,8 @@ def get_chart(asset,liability, columns):
 
 	for c in columns:
 		if asset:
-			print('************',asset[-2].get(c.get("fieldname")))
 			asset_data.append(asset[-2].get(c.get("fieldname")))
 		if liability:
-			print('*********',liability[-2].get(c.get("fieldname")))
 			liability_data.append(liability[-2].get(c.get("fieldname")))
 		
 	datasets = []
