@@ -9,7 +9,9 @@
   "is_group",
   "account_name",
   "account_number",
+  "root_type",
   "account_type",
+  "is_credit",
   "section_break_5",
   "parent_account",
   "report_type",
@@ -95,12 +97,23 @@
   {
    "fieldname": "section_break_5",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "root_type",
+   "fieldtype": "Data",
+   "label": "Root Type"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_credit",
+   "fieldtype": "Check",
+   "label": "Is Credit"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-05-02 19:40:46.465341",
+ "modified": "2021-05-16 20:01:02.106471",
  "modified_by": "Administrator",
  "module": "Financemod",
  "name": "Account",

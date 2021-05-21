@@ -33,12 +33,14 @@
   {
    "fieldname": "debit_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Debit Amount",
    "read_only": 1
   },
   {
    "fieldname": "credit_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Credit Amount",
    "read_only": 1
   },
@@ -65,6 +67,7 @@
    "default": "0",
    "fieldname": "is_cancelled",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Is Cancelled",
    "read_only": 1
   },
@@ -77,7 +80,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-13 22:05:03.731468",
+ "modified": "2021-05-20 12:46:57.994988",
  "modified_by": "Administrator",
  "module": "Financemod",
  "name": "GL Entry",

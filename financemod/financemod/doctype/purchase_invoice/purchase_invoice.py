@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 
 class PurchaseInvoice(Document):
-	def create_gl_entry(self,cancel_entry):
+	def get_item_accounts(self):
 		item_accounts = {}
 
 		for j in range(len(self.item)):
@@ -15,6 +15,22 @@ class PurchaseInvoice(Document):
 				item_accounts[self.item[j].debit_to] += int(self.item[j].amount)
 			else:
 				item_accounts.update({self.item[j].debit_to : int(self.item[j].amount)})
+		return item_accounts
+
+	def enable_is_cancel(self):
+		query = f"""
+				UPDATE 
+					`tabGL Entry`
+				SET 
+					is_cancelled = 1
+				WHERE 
+					voucher_no = '{self.name}' 
+
+				"""
+		frappe.db.sql(query)
+
+	def create_gl_entry(self,cancel_entry):
+		item_accounts = self.get_item_accounts()
 
 		#create entries for debt accounts			
 		for  ac,am in item_accounts.items():
@@ -23,13 +39,19 @@ class PurchaseInvoice(Document):
 			debt_amount = am
 			cred_amount = 0
 			is_cancel = False 
+			# is_credit = False
 
 		#if reverse entry the reverse the account details
 			if cancel_entry:
 				# acct, acct_against = acct_against, acct
 				debt_amount,cred_amount = cred_amount,debt_amount
 				is_cancel = True 
+				# is_credit = True
 
+				self.enable_is_cancel()
+
+
+			# for debiting item entries
 			doc = frappe.get_doc({
 				'doctype': 'GL Entry',
 				'posting_date':self.date,
@@ -40,10 +62,12 @@ class PurchaseInvoice(Document):
 				'against':acct_against,
 				'voucher_type':self.doctype,
 				'voucher_no':self.name,
-				'is_cancelled':is_cancel
+				'is_cancelled':is_cancel,
+				# 'is_credit':is_credit
 			})
 			doc.insert()
 
+		#for crediting payment from account
 		doc = frappe.get_doc({
 				'doctype': 'GL Entry',
 				'posting_date':self.date,
@@ -54,7 +78,8 @@ class PurchaseInvoice(Document):
 				'against': ' ,'.join(list(a for a,b in item_accounts.items())),
 				'voucher_type':self.doctype,
 				'voucher_no':self.name,
-				'is_cancelled': True if cancel_entry else False
+				'is_cancelled': True if cancel_entry else False,
+				# 'is_credit': True if not cancel_entry else False
 		})
 		doc.insert()
 		self.reload()
