@@ -10,10 +10,9 @@ from frappe import _
 
 
 def execute(filters=None, filter_by_date=True):
-	print(filters)
+
 	assets = get_data_to_display('Asset','Debit',filters)
 	liabilities = get_data_to_display('Liability','Credit',filters)
-
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(assets, liabilities)
 
 	data = []	
@@ -30,6 +29,7 @@ def execute(filters=None, filter_by_date=True):
 	chart = get_chart(assets, liabilities, columns)
 
 	return columns,data,[],chart, report_summary
+
 
 def get_data_to_display(root_type, balance_must_be,filters):
 	accounts = get_accounts(root_type)
