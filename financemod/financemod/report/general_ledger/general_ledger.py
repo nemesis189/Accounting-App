@@ -11,9 +11,16 @@ from frappe.utils import getdate, cstr, flt, fmt_money
 def execute(filters=None):
 	columns, data = [], []
 	gl_entries = get_gl_entries(filters)
-	data = get_data_with_opening_closing(filters, gl_entries)
+	data1 = get_data_with_opening_closing(filters, gl_entries)
+	print('DAAAATAAAAAAAAA111111    ::',data1)
 
 	columns = get_columns(filters)
+
+	gle_list = entries_as_per_group(gl_entries,filters)
+	data = calculate_totals_for_group(filters, gle_list)
+
+
+
 	return columns, data
 
 
@@ -51,118 +58,102 @@ def get_conditions(filters):
 
 	if not filters.get("show_cancelled_entries"):
 		conditions.append(" AND is_cancelled = 0")
-	
+
 	return ''.join(conditions)
 
 
 
-def get_data_with_opening_closing(filters, gl_entries):
-	data = []
+def get_totals_row():
 
-	gle_map = get_gle_map(gl_entries, filters)
-
-	totals, entries = calculate_gle_open_close_totals(gl_entries, gle_map, filters)
-
-	# Opening for filtered account
-	data.append(totals.opening)
-
-	if filters.get("group_by") != _('Group by Voucher (Consolidated)'):
-		for acc, acc_dict in gle_map.items():
-			# acc
-			if acc_dict.entries:
-				# opening
-				data.append({})
-				if filters.get("group_by") != _("Group by Voucher"):
-					data.append(acc_dict.totals.opening)
-
-				data += acc_dict.entries
-
-				# totals
-				data.append(acc_dict.totals.total)
-
-				# closing
-				if filters.get("group_by") != _("Group by Voucher"):
-					data.append(acc_dict.totals.closing)
-		data.append({})
-	else:
-		data += entries
-
-	# totals
-	data.append(totals.total)
-
-	# closing
-	data.append(totals.closing)
-
-	return data
-
-
-def get_totals_dict():
-	def _get_debit_credit_dict(label):
+	def get_row(title):
 		return _dict(
-			account="'{0}'".format(label),
-			debit_amount = 0.0,
-			credit_amount = 0.0,
-			debit_in_account_currency=0.0,
-			credit_in_account_currency=0.0
-		)
+				account = title,
+				debit_amount = 0.0,
+				credit_amount = 0.0
+			)
+		
 	return _dict(
-		opening = _get_debit_credit_dict(_('Opening')),
-		total = _get_debit_credit_dict(_('Total')),
-		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
-	)		
-	
-def group_by_field(group_by):
-	if group_by in [_('Group by Voucher (Consolidated)'), _('Group by Account')]:
-		return 'account'
-	else:
+		opening = get_row('Opening'),
+		total = get_row('Total'),
+		closing = get_row('Closing (Total + Opening'),
+
+	)
+
+def map_by_group(gl_entries, grp_key):
+	accounts = OrderedDict()
+	for gle in gl_entries:
+		accounts.setdefault(gle.get(grp_key), []).append(gle)
+	return accounts
+		
+def get_key_for_group(filters):
+	if filters['group_by'] in ['Group by Voucher (Consolidated)', 'Group by Voucher']:
 		return 'voucher_no'
-
-def get_gle_map(gl_entries, filters):
-	gle_map = OrderedDict()
-	group_by = group_by_field(filters.get('group_by'))
-
-	for gle in gl_entries:
-		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
-	# print("GLE MAP  :::::: ",gle_map)
-	return gle_map
+	else: return 'account'
 
 
-def calculate_gle_open_close_totals(gl_entries, gle_map, filters,):
-	totals = get_totals_dict()
-	entries = []
-	consolidated_gle = OrderedDict()
-	group_by = group_by_field(filters.get('group_by'))
 
-	def update_value_in_dict(data, key, gle):
-		data[key]['debit_amount'] += flt(gle.debit_amount)
-		data[key]['credit_amount'] += flt(gle.credit_amount)
 
-		if data[key].against_voucher and gle.against_voucher:
-			data[key].against_voucher += ', ' + gle.against_voucher
-		
+def entries_as_per_group(gl_entries, filters):
+	gle_list = {}
+	key_list = []
+	grp_key = get_key_for_group(filters)
+	accounts_by_voucher = map_by_group(gl_entries, grp_key)
+	consolidated = 1 if filters['group_by'] == 'Group by Voucher (Consolidated)' else 0
+	if consolidated:
+		for vno in list(accounts_by_voucher):
+			for gle in accounts_by_voucher[vno]:
+				key = (vno, gle['account'])
+				if key not in key_list:
+					key_list.append(key)
+					gle_list[key] = gle
+				else:
+					gle_list[key]['debit_amount']+= gle[debit_amount]
+					gle_list[key]['credit_amount']+= gle[credit_amount]
 
-	for gle in gl_entries:
-		update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
-		update_value_in_dict(totals, 'total', gle)
+					if gle_list[key]['against'] and gle['against']:
+						gle_list[key]['against'] += ' ,'+gle['against']
+		final_gle_list = { x: [gle_list[x]] for x in gle_list}
+		return final_gle_list
+	else:
+		return accounts_by_voucher 
 
-		if filters.get("group_by") != _('Group by Voucher (Consolidated)'):
-			gle_map[gle.get(group_by)].entries.append(gle)
-		elif filters.get("group_by") == _('Group by Voucher (Consolidated)'):
-			keylist = [gle.get("voucher_type"), gle.get("voucher_no"), gle.get("account")]
-			key = tuple(keylist)
-			if key not in consolidated_gle:
-				consolidated_gle.setdefault(key, gle)
-			else:
-				print()
-				update_value_in_dict(consolidated_gle, key, gle)
-		
-		update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
-		update_value_in_dict(totals, 'closing', gle)
+
+def calculate_totals_for_group(filters,gle_list):
+	data = []
+	consolidated_total = get_totals_row()
+	consolidated = 1 if filters['group_by'] == 'Group by Voucher (Consolidated)' else 0
+
+	for row in gle_list:
+		if not consolidated:
+			data.append({})
+		totals = get_totals_row()
+		for entries in gle_list[row]:
+			totals['total']['debit_amount']  += entries['debit_amount']
+			totals['total']['credit_amount']  += entries['credit_amount']
+
+		totals['closing']['debit_amount']  = totals['opening']['debit_amount'] + totals['total']['debit_amount']
+		totals['closing']['credit_amount'] = totals['opening']['credit_amount'] + totals['total']['credit_amount']
+
+		consolidated_total['total']['debit_amount'] += totals['total']['debit_amount']
+		consolidated_total['total']['credit_amount'] += totals['total']['credit_amount']
+
+		if not consolidated:
+			if filters['group_by'] != 'Group by Voucher':
+				data.append(totals['opening'])
+			data += gle_list[row]
+			if not consolidated:
+				data += [totals['total'],totals['closing'] ]
+
+		else:
+			data += gle_list[row]
+			
+	consolidated_total['closing']['debit_amount']  = consolidated_total['opening']['debit_amount'] + consolidated_total['total']['debit_amount']
+	consolidated_total['closing']['credit_amount'] = consolidated_total['opening']['credit_amount'] + consolidated_total['total']['credit_amount']
 	
-	for key, value in consolidated_gle.items():
-		entries.append(value)
-	
-	return totals, entries
+	data.append({})
+	data += [consolidated_total['total'],consolidated_total['closing'] ]
+	data = [ consolidated_total['opening']] + data
+	return data
 
 
 def get_columns(filters):
@@ -202,12 +193,7 @@ def get_columns(filters):
 			"fieldtype": "Float",
 			"width": 100
 		},
-	# 	{
-	# 		"label": _("Balance ({0})").format(currency),
-	# 		"fieldname": "balance",
-	# 		"fieldtype": "Float",
-	# 		"width": 130
-	# 	}
+	
 	]
 
 	columns.extend([
@@ -228,63 +214,8 @@ def get_columns(filters):
 			"fieldname": "against",
 			"width": 120
 		},
-		# {
-		# 	"label": _("Party Type"),
-		# 	"fieldname": "party_type",
-		# 	"width": 100
-		# },
-		# {
-		# 	"label": _("Party"),
-		# 	"fieldname": "party",
-		# 	"width": 100
-		# },
-		# {
-		# 	"label": _("Project"),
-		# 	"options": "Project",
-		# 	"fieldname": "project",
-		# 	"width": 100
-		# }
+		
 	])
 
-	# if filters.get("include_dimensions"):
-	# 	for dim in get_accounting_dimensions(as_list = False):
-	# 		columns.append({
-	# 			"label": _(dim.label),
-	# 			"options": dim.label,
-	# 			"fieldname": dim.fieldname,
-	# 			"width": 100
-	# 		})
-
-	# columns.extend([
-	# 	{
-	# 		"label": _("Cost Center"),
-	# 		"options": "Cost Center",
-	# 		"fieldname": "cost_center",
-	# 		"width": 100
-	# 	},
-	# 	{
-	# 		"label": _("Against Voucher Type"),
-	# 		"fieldname": "against_voucher_type",
-	# 		"width": 100
-	# 	},
-	# 	{
-	# 		"label": _("Against Voucher"),
-	# 		"fieldname": "against_voucher",
-	# 		"fieldtype": "Dynamic Link",
-	# 		"options": "against_voucher_type",
-	# 		"width": 100
-	# 	},
-	# 	{
-	# 		"label": _("Supplier Invoice No"),
-	# 		"fieldname": "bill_no",
-	# 		"fieldtype": "Data",
-	# 		"width": 100
-	# 	},
-	# 	{
-	# 		"label": _("Remarks"),
-	# 		"fieldname": "remarks",
-	# 		"width": 400
-	# 	}
-	# ])
 
 	return columns

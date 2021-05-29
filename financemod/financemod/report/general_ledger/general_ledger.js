@@ -34,9 +34,7 @@ frappe.query_reports["General Ledger"] = {
 				frappe.query_report.set_filter_value('group_by', "Group by Voucher (Consolidated)");
 			}
 		},
-		{
-			"fieldtype": "Break",
-		},
+		
 		{
 			"fieldname":"group_by",
 			"label": __("Group by"),
