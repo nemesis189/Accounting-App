@@ -73,8 +73,8 @@ class PurchaseInvoice(Document):
 				'posting_date':self.date,
 				'posting_time':self.posting_time,
 				'account': self.credit_to,
-				'debit_amount': sum([int(b) for a,b in item_accounts.items()]) if is_cancel else 0,
-				'credit_amount': 0 if is_cancel else sum([int(b) for a,b in item_accounts.items()]) ,
+				'debit_amount': sum([float(b) for a,b in item_accounts.items()]) if is_cancel else 0,
+				'credit_amount': 0 if is_cancel else sum([float(b) for a,b in item_accounts.items()]) ,
 				'against': ' ,'.join(list(a for a,b in item_accounts.items())),
 				'voucher_type':self.doctype,
 				'voucher_no':self.name,
@@ -84,10 +84,6 @@ class PurchaseInvoice(Document):
 		doc.insert()
 		self.reload()
 
-
-			
- 
-
 	def on_submit(self):
 		self.create_gl_entry(0)
 		self.reload()
@@ -95,12 +91,3 @@ class PurchaseInvoice(Document):
 	def on_cancel(self):
 		self.create_gl_entry(1)
 		self.reload()
-
-	# def after_insert(self):
-	# 	doc = frappe.get_last_doc('GL Entry')
-	# 	frappe.set_value('GL Entry',doc.name,'voucher_no',self.name)
-	# 	doc.db_set('voucher_no',self.name)
-	# 	print("**********************",self.name)
-	# 	print("**********************",doc)
-	# 	doc.save()
-	# 	doc.reload()

@@ -18,7 +18,6 @@
   "total_quantity",
   "accounting_section",
   "debit_to",
-  "credit_to",
   "amended_from"
  ],
  "fields": [
@@ -71,12 +70,14 @@
   {
    "fieldname": "total_rate",
    "fieldtype": "Currency",
-   "label": "Total Rate"
+   "label": "Total Rate",
+   "read_only": 1
   },
   {
    "fieldname": "total_quantity",
    "fieldtype": "Float",
-   "label": "Total Quantity"
+   "label": "Total Quantity",
+   "read_only": 1
   },
   {
    "fieldname": "accounting_section",
@@ -89,12 +90,6 @@
    "label": "Debit To",
    "options": "Account",
    "reqd": 1
-  },
-  {
-   "fieldname": "credit_to",
-   "fieldtype": "Link",
-   "label": "Credit To",
-   "options": "Account"
   },
   {
    "fieldname": "amended_from",
@@ -113,7 +108,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-08 12:38:09.323949",
+ "modified": "2021-05-29 18:35:57.685262",
  "modified_by": "Administrator",
  "module": "Financemod",
  "name": "Sales Invoice",

@@ -8,7 +8,8 @@
   "item_name",
   "rate",
   "quantity",
-  "total"
+  "total",
+  "credit_to"
  ],
  "fields": [
   {
@@ -41,12 +42,19 @@
    "label": "Total",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "credit_to",
+   "fieldtype": "Link",
+   "label": "Credit To",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-07 22:56:20.742865",
+ "modified": "2021-05-29 18:37:06.827199",
  "modified_by": "Administrator",
  "module": "Financemod",
  "name": "Sales Invoice Item",

@@ -11,8 +11,6 @@ from frappe.utils import getdate, cstr, flt, fmt_money
 def execute(filters=None):
 	columns, data = [], []
 	gl_entries = get_gl_entries(filters)
-	data1 = get_data_with_opening_closing(filters, gl_entries)
-	print('DAAAATAAAAAAAAA111111    ::',data1)
 
 	columns = get_columns(filters)
 
