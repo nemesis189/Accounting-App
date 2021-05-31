@@ -1,0 +1,20 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<h1>{{ item_name }}</h1>
+
+<div class="py-20 row">
+    <div class="col-sm-2">
+        <img src="{{ item_image }}" alt="{{ item_name }}">
+    </div>
+    <div class="col">
+        <h1>{{ item_name }}</h1>
+        <p class="lead">Code: {{ item_code }}</p>
+        <div class="mt-4">
+            <div>Rate: <strong>{{ rate }}</strong></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- this is a sample default web page template -->

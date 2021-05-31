@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_guest_to_view": 1,
  "autoname": "item_name",
  "creation": "2021-05-03 11:10:21.661416",
  "doctype": "DocType",
@@ -11,7 +12,8 @@
   "rate",
   "default_unit_of_measure",
   "stock",
-  "item_image"
+  "item_image",
+  "route"
  ],
  "fields": [
   {
@@ -48,13 +50,18 @@
    "fieldname": "item_image",
    "fieldtype": "Attach Image",
    "label": "Item Image"
+  },
+  {
+   "fieldname": "route",
+   "fieldtype": "Data",
+   "label": "Route"
   }
  ],
+ "has_web_view": 1,
  "image_field": "item_image",
  "index_web_pages_for_search": 1,
- "is_published_field": "item_name",
  "links": [],
- "modified": "2021-05-27 19:47:18.411833",
+ "modified": "2021-05-31 10:37:18.330531",
  "modified_by": "Administrator",
  "module": "Financemod",
  "name": "Item",
@@ -73,10 +80,9 @@
    "write": 1
   }
  ],
- "route": "products",
  "search_fields": "item_name",
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "item_image",
+ "title_field": "item_name",
  "track_changes": 1
 }

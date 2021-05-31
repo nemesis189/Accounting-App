@@ -191,10 +191,7 @@ def get_columns(filters):
 			"fieldtype": "Float",
 			"width": 100
 		},
-	
-	]
-
-	columns.extend([
+		
 		{
 			"label": _("Voucher Type"),
 			"fieldname": "voucher_type",
@@ -210,10 +207,10 @@ def get_columns(filters):
 		{
 			"label": _("Against Account"),
 			"fieldname": "against",
-			"width": 120
+			"width": 180
 		},
 		
-	])
+	]
 
 
 	return columns
