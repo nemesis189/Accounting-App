@@ -44,6 +44,7 @@
    "reqd": 1
   },
   {
+   "default": "Creditors",
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
@@ -54,7 +55,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-29 18:37:06.827199",
+ "modified": "2021-06-02 20:58:57.879896",
  "modified_by": "Administrator",
  "module": "Financemod",
  "name": "Sales Invoice Item",

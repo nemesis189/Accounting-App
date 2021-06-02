@@ -43,10 +43,8 @@ class SalesInvoice(Document):
 
 		#if reverse entry the reverse the account details
 			if cancel_entry:
-				# acct, acct_against = acct_against, acct
 				cred_amount,debt_amount = debt_amount, cred_amount
 				is_cancel = True 
-				# is_credit = True
 
 				self.enable_is_cancel()
 
@@ -63,7 +61,6 @@ class SalesInvoice(Document):
 				'voucher_type':self.doctype,
 				'voucher_no':self.name,
 				'is_cancelled':is_cancel,
-				# 'is_credit':is_credit
 			})
 			doc.insert()
 
@@ -80,7 +77,6 @@ class SalesInvoice(Document):
 				'voucher_type':self.doctype,
 				'voucher_no':self.name,
 				'is_cancelled': True if cancel_entry else False,
-				# 'is_credit': True if not cancel_entry else False
 		})
 		doc.insert()
 		self.reload()

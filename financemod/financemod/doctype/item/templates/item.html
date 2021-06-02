@@ -1,20 +1,70 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
-<h1>{{ item_name }}</h1>
+<!-- <h1 class="mt-20">{{ item_name }}</h1> -->
 
 <div class="py-20 row">
-    <div class="col-sm-2">
-        <img src="{{ item_image }}" alt="{{ item_name }}">
+    <div class="">
+        <img src="{{ item_image }}" alt="{{ item_name }}" style="max-width: 250px;max-height: 250px;">
     </div>
-    <div class="col">
-        <h1>{{ item_name }}</h1>
-        <p class="lead">Code: {{ item_code }}</p>
-        <div class="mt-4">
-            <div>Rate: <strong>{{ rate }}</strong></div>
+    <div class="col ml-10">
+        <!-- <div class="row">   -->
+            <h1>{{ item_name }}</h1>
+            <p class="lead">Code: {{ item_code }}</p>
+            <div class="" style="font-size: 30px;">
+                <div>Rate: <strong>₹ {{ rate }} / {{ def_uom }}</strong></div>
+            </div> 
+            
+            <div class="mt-10" style="font-size: 20px;">
+                
+                <div class="input-group">
+                    <input style="max-width: 100px;" type="number" class="form-control" value="0" id="item_qty" />
+                    <div class="input-group-append" >
+                        <span class="input-group-text"><strong>{{def_uom}}</strong></span>
+                    </div>
+                </div>
+            </div>
+        <!-- </div> -->
+        <div class="mt-14">
+            <button onclick="insert()" id='add_item' data-item = "{{ item_code }}"  name='add_item' type="button" class="btn btn-outline-warning" style="font-size: 25px;font-weight: bolder;">
+                Add to cart<i class="fas fa-shopping-cart"></i>
+            </button>
+            
         </div>
     </div>
 </div>
+
+<script>
+
+    // const customer = fra
+    const item_name = '{{ item_name }}' ;
+    const item_code = '{{ item_code }}' ;
+    const item_rate = '{{ rate }}' ;
+    const quant = document.getElementById('item_qty').value;
+    
+    function insert()
+    {
+        // item_code = document.getElementById('add_item').getAttribute('item_code');
+        frappe.call({
+            method: 'financemod.financemod.doctype.item.item.clickmethod',
+            args: {
+                'quantity': quant ,
+               'item': { 
+                    'name': item_name,
+                    'code': item_code,
+                    'rate': item_rate 
+                    }
+                
+            },
+            callback: function(r) {
+                // if (!r.exc) {
+                //     // code snippet
+                // }
+            }
+        });
+    }
+
+</script>
 {% endblock %}
 
 <!-- this is a sample default web page template -->

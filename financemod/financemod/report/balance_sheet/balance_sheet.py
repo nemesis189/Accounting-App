@@ -37,6 +37,10 @@ def execute(filters=None, filter_by_date=True):
 
 
 def get_period_divisions(start_date,end_date, division):
+
+	# method that returns list of (start_date,end_date)
+	# based on the periodicity
+
 	date_list = []
 	dt_start = start_date
 	dt_end = end_date
@@ -88,10 +92,9 @@ def get_period_list(filters):
 
 		div_factor = {"Yearly":12, "Quarterly":3, 'Monthly':1 }
 
-		period_list = get_period_divisions(fiscal_year_dates['year_start_date'], fiscal_year_dates['year_end_date'], div_factor[filters['periodicity']])
+		period_list = get_period_divisions(fiscal_year_dates['year_start_date'],
+										fiscal_year_dates['year_end_date'], div_factor[filters['periodicity']])
 		return period_list
-
-
 
 
 
@@ -102,7 +105,6 @@ def get_data_to_display(root_type, balance_must_be,period_list,filters):
 	gle_by_accounts = get_gle_accounts(filters,root_type)
 	accounts, accounts_by_name, parent_child_accs = filter_parent_child(accounts)
 
-	
 	calculate_values(accounts_by_name,gle_by_accounts,period_list,filters)
 
 	output = prepare_data_row(accounts, balance_must_be,period_list,filters)
@@ -115,7 +117,6 @@ def get_data_to_display(root_type, balance_must_be,period_list,filters):
 
 
 def calculate_values(accounts_by_name, gle_by_accounts,period_list,filters):
-	# abn = accounts_by_name
 	for entries in gle_by_accounts.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry['account'])
@@ -127,6 +128,7 @@ def calculate_values(accounts_by_name, gle_by_accounts,period_list,filters):
 			for period in period_list:
 				if (entry['posting_date'] <= datetime.datetime.strptime(period['end_date'],'%Y-%m-%d').date()) and  \
 						(entry['posting_date'] >= datetime.datetime.strptime(period['start_date'],'%Y-%m-%d').date()):
+						
 					d[period['key']] = d.get(period['key'], 0.0) + flt(entry['debit_amount']) - flt(entry['credit_amount'])
 
 				
@@ -152,7 +154,6 @@ def prepare_data_row(accounts, balance_must_be,period_list,filters):
 			row[period['key']] = flt(acc.get(period['key'], 0.0), 3)
 
 			if abs(row[period['key']]) >= 0.005:
-				# ignore zero values
 				has_value = True
 				total += flt(row[period['key']])
 

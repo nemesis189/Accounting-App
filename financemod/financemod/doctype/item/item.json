@@ -10,7 +10,7 @@
   "item_code",
   "item_name",
   "rate",
-  "default_unit_of_measure",
+  "def_uom",
   "stock",
   "item_image",
   "route"
@@ -36,12 +36,6 @@
    "label": "Rate"
   },
   {
-   "fieldname": "default_unit_of_measure",
-   "fieldtype": "Link",
-   "label": "Default Unit Of Measure",
-   "options": "UOM"
-  },
-  {
    "fieldname": "stock",
    "fieldtype": "Float",
    "label": "Stock"
@@ -55,13 +49,19 @@
    "fieldname": "route",
    "fieldtype": "Data",
    "label": "Route"
+  },
+  {
+   "fieldname": "def_uom",
+   "fieldtype": "Link",
+   "label": "Default Unit Of Measure",
+   "options": "UOM"
   }
  ],
  "has_web_view": 1,
  "image_field": "item_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-31 10:37:18.330531",
+ "modified": "2021-06-02 12:51:14.587132",
  "modified_by": "Administrator",
  "module": "Financemod",
  "name": "Item",
