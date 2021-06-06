@@ -61,7 +61,7 @@
  "image_field": "item_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-02 12:51:14.587132",
+ "modified": "2021-06-04 15:20:04.003674",
  "modified_by": "Administrator",
  "module": "Financemod",
  "name": "Item",
@@ -80,6 +80,7 @@
    "write": 1
   }
  ],
+ "route": "products",
  "search_fields": "item_name",
  "sort_field": "modified",
  "sort_order": "DESC",

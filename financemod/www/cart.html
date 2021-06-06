@@ -1,0 +1,76 @@
+{% if logged_in %}
+
+    {% if item_list %}
+
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Item Name</th>
+                    <th scope="col">Rate</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% for item in item_list %}
+                    <tr>
+                        <th scope="row">{{loop.index}}</th>
+                        <td>{{ item }}</td>
+                        <td>{{ item_list[item]['rate'] }}</td>
+                        <td>{{ item_list[item]['quantity'] }}</td>
+                        <td>{{ item_list[item]['total'] }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <th scope="row"><b>Total</b></th>
+                    <td></td>
+                    <td></td>
+                    <td><strong>{{ final_total['quantity'] }}</strong></td>
+                    <td><strong>{{ final_total['total'] }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+                    
+        <div class="mt-20">
+            <button  id='add_item' onclick="purchase_items()" name='add_item' type="button" class="btn btn-outline-danger" style="font-size: 35px;font-weight: bolder;">
+                Purchase Cart Items<i class="fas fa-shopping-cart"></i>
+            </button>
+        </div>
+
+    {% else %}
+        <h1>Please Add Items To Your Cart First</h1>
+    {% endif %}
+
+{% else %}
+    <h1>Please Log in first</h1>
+{% endif %}
+
+<script>
+
+    function purchase_items(){
+
+        frappe.confirm('Are you sure you want to proceed?',
+            () => {
+                frappe.call({
+                    method: 'financemod.www.cart.submit_si',
+                    args: {},
+
+                    callback: function(res) {
+                        if( res.message == 'error'){
+                            frappe.throw("Transaction Failed! :(")
+                        //    $('#get-info').show();
+                        }
+                        else{
+                            frappe.msgprint('Transaction Successful! :D')
+                        }
+                    }
+                });
+            }, () => {
+                return;
+            });
+       
+    }
+</script>

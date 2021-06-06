@@ -36,12 +36,13 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Customer Id",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-07 20:08:27.889673",
+ "modified": "2021-06-05 20:36:10.518538",
  "modified_by": "Administrator",
  "module": "Financemod",
  "name": "Customer",

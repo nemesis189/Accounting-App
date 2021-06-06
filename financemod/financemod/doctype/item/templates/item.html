@@ -26,43 +26,81 @@
             </div>
         <!-- </div> -->
         <div class="mt-14">
-            <button onclick="insert()" id='add_item' data-item = "{{ item_code }}"  name='add_item' type="button" class="btn btn-outline-warning" style="font-size: 25px;font-weight: bolder;">
+            <button  id='add_item' onclick="insert()" name='add_item' type="button" class="btn btn-outline-warning" style="font-size: 25px;font-weight: bolder;">
                 Add to cart<i class="fas fa-shopping-cart"></i>
             </button>
-            
         </div>
+
+        <div id = 'get-info' class=" row ml-0 mt-5 card p-0 " style="width: 360px; display: none;">
+            <input class="form-control" type="text" placeholder="First Name" id="customer-first-name" />
+            <input class="form-control mt-4" type="text" placeholder="Last Name" id="customer-last-name" />
+            <input class="form-control mt-4" type="text" placeholder="Customer Id" id="customer-id" />
+            <button class="btn btn-success mt-4 w-100" onclick="change_values()" id="info_submit">Submit</button>
+          </div>
     </div>
 </div>
 
 <script>
 
-    // const customer = fra
-    const item_name = '{{ item_name }}' ;
-    const item_code = '{{ item_code }}' ;
-    const item_rate = '{{ rate }}' ;
-    const quant = document.getElementById('item_qty').value;
+    var customer = '{{ frappe.get_fullname() }}';
+    var item_name = '{{ item_name }}' ;
+    var item_code = '{{ item_code }}' ;
+    var item_rate = '{{ rate }}' ;
+    // alert(quant);
     
-    function insert()
-    {
-        // item_code = document.getElementById('add_item').getAttribute('item_code');
+    
+    // alert(document.getElementById('add_item').getAttribute('data-item'))
+    function insert(){
+        
+        var quant = document.getElementById('item_qty').value;
         frappe.call({
+            // btn: $('#add_item'),
             method: 'financemod.financemod.doctype.item.item.clickmethod',
             args: {
+                'customer': customer,
                 'quantity': quant ,
-               'item': { 
+                'item': { 
                     'name': item_name,
                     'code': item_code,
                     'rate': item_rate 
                     }
                 
             },
-            callback: function(r) {
-                // if (!r.exc) {
-                //     // code snippet
-                // }
+            callback: function(res) {
+                if( res.message == 'error'){
+                    $(document).ready( function() {
+                        frappe.msgprint('Please Enter name and id\n <b>ID sould be UNIQUE</b>');
+                        $('#get-info').toggle();
+                    });
+                //    $('#get-info').show();
+                }
             }
         });
     }
+    function change_values(){
+        var fname = document.getElementById('customer-first-name').value;
+        var lname = document.getElementById('customer-last-name').value;
+        var id = document.getElementById('customer-id').value;
+        frappe.call({
+            method: 'financemod.financemod.doctype.item.item.insert_customer',
+            args: {
+                'fname': fname,
+                'lname': lname ,
+                'cid': id
+                
+            },
+            callback: function(res) {
+                if( res.message != 'error'){
+                    alert(res.message)
+                    customer = fname + ' ' + lname;
+                    insert();
+                }
+            }
+        });
+
+    }
+
+
 
 </script>
 {% endblock %}
