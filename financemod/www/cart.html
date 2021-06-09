@@ -6,6 +6,7 @@
             <thead class="thead-light">
                 <tr>
                     <th scope="col">#</th>
+                    <th scope="col"></th>
                     <th scope="col">Item Name</th>
                     <th scope="col">Rate</th>
                     <th scope="col">Quantity</th>
@@ -17,15 +18,17 @@
                 {% for item in item_list %}
                     <tr>
                         <th scope="row">{{loop.index}}</th>
+                        <td><img src="{{ item_list[item]['image'] }}" width="150" height="150"></td>
                         <td>{{ item }}</td>
                         <td>{{ item_list[item]['rate'] }}</td>
                         <td>{{ item_list[item]['quantity'] }}</td>
                         <td>{{ item_list[item]['total'] }}</td>
                     </tr>
                 {% endfor %}
-                <tr>
-                    <th scope="row"><b>Total</b></th>
+                <tr style="font-size: 30px;">
+                    <th scope="row"></th>
                     <td></td>
+                    <td><b >Total</b></td>
                     <td></td>
                     <td><strong>{{ final_total['quantity'] }}</strong></td>
                     <td><strong>{{ final_total['total'] }}</strong></td>
@@ -61,7 +64,6 @@
                     callback: function(res) {
                         if( res.message == 'error'){
                             frappe.throw("Transaction Failed! :(")
-                        //    $('#get-info').show();
                         }
                         else{
                             frappe.msgprint('Transaction Successful! :D')

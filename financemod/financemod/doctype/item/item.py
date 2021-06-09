@@ -23,38 +23,41 @@ def clickmethod(customer,quantity,item):
 	si = find_drafted_si(customer)
 
 	cart = {'item_name': item_name['name'], 'rate': item_dict['rate'], 'quantity':quantity, 'total':total}
+
+	try:
+		if not si:
+			doc = frappe.get_doc({
+				'doctype' : 'Sales Invoice',
+				'series' : 'ACC-SINV-.YYYY.-',
+				'item' : [ cart ],
+				'customer' : customer
+			})
+			doc.save()
+
+		else:
+			si_item_fields = {
+				'doctype': 'Sales Invoice Item',
+				'docstatus' : si.docstatus,
+				'parent' : si.name,
+				'parentfield' : 'item',
+				'parenttype' : 'Sales Invoice',
+			}
+
+			si_item_fields.update(cart)
+			si_item = frappe.get_doc(si_item_fields)
+			si_item.save()
 	
-	if not si:
-		doc = frappe.get_doc({
-			'doctype' : 'Sales Invoice',
-			'series' : 'ACC-SINV-.YYYY.-',
-			'item' : [ cart ],
-			'customer' : customer
-		})
-		doc.save()
-
-	else:
-		si_item_fields = {
-			'doctype': 'Sales Invoice Item',
-			'docstatus' : si.docstatus,
-			'parent' : si.name,
-			'parentfield' : 'item',
-			'parenttype' : 'Sales Invoice',
-		}
-
-		si_item_fields.update(cart)
-		si_item = frappe.get_doc(si_item_fields)
-		si_item.save()
+	except:
+		return 'trans_error'
 
 
-	return 
+	return 'success'
 
 @frappe.whitelist()
 def check_customer(customer):
 	c = frappe.db.sql(''' Select name,first_name,last_name from tabCustomer''', as_dict=True)
 	# print(c)
 	cust_list = { x.first_name +' '+x.last_name : x.name for x in c}
-	print('CUSTOMER LIST ::::::::::::::::::',cust_list)
 	if customer not in cust_list:
 		return None
 	else:
@@ -70,7 +73,6 @@ def insert_customer(fname,lname,cid):
 		'last_name':lname,
 		'customer_id':cid
 	})
-	print(customer.first_name)
 	# customer.save()
 	customer.insert()
 	return 1

@@ -46,15 +46,12 @@
     var item_name = '{{ item_name }}' ;
     var item_code = '{{ item_code }}' ;
     var item_rate = '{{ rate }}' ;
-    // alert(quant);
     
     
-    // alert(document.getElementById('add_item').getAttribute('data-item'))
     function insert(){
-        
+
         var quant = document.getElementById('item_qty').value;
         frappe.call({
-            // btn: $('#add_item'),
             method: 'financemod.financemod.doctype.item.item.clickmethod',
             args: {
                 'customer': customer,
@@ -72,11 +69,18 @@
                         frappe.msgprint('Please Enter name and id\n <b>ID sould be UNIQUE</b>');
                         $('#get-info').toggle();
                     });
-                //    $('#get-info').show();
+                }
+                else if(res.message == 'trans_error'){
+                    frappe.msgprint('Failed to add!')
+                }
+                else {
+                    frappe.msgprint('Item Added to Cart!')
                 }
             }
         });
     }
+
+
     function change_values(){
         var fname = document.getElementById('customer-first-name').value;
         var lname = document.getElementById('customer-last-name').value;
@@ -95,6 +99,7 @@
                     customer = fname + ' ' + lname;
                     insert();
                 }
+                
             }
         });
 
