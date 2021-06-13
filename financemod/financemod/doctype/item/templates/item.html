@@ -8,23 +8,21 @@
         <img src="{{ item_image }}" alt="{{ item_name }}" style="max-width: 250px;max-height: 250px;">
     </div>
     <div class="col ml-10">
-        <!-- <div class="row">   -->
-            <h1>{{ item_name }}</h1>
-            <p class="lead">Code: {{ item_code }}</p>
-            <div class="" style="font-size: 30px;">
-                <div>Rate: <strong>₹ {{ rate }} / {{ def_uom }}</strong></div>
-            </div> 
-            
-            <div class="mt-10" style="font-size: 20px;">
-                
-                <div class="input-group">
-                    <input style="max-width: 100px;" type="number" class="form-control" value="0" id="item_qty" />
-                    <div class="input-group-append" >
-                        <span class="input-group-text"><strong>{{def_uom}}</strong></span>
-                    </div>
+        <h1>{{ item_name }}</h1>
+        <p class="lead">Code: {{ item_code }}</p>
+        <div class="" style="font-size: 30px;">
+            <div>Rate: <strong>₹ {{ rate }} / {{ def_uom }}</strong></div>
+        </div> 
+        
+        <div class="mt-10" style="font-size: 20px;">
+            <div class="input-group">
+                <input style="max-width: 100px;" type="number" class="form-control" value="0" id="item_qty" />
+                <div class="input-group-append" >
+                    <span class="input-group-text"><strong>{{def_uom}}</strong></span>
                 </div>
             </div>
-        <!-- </div> -->
+        </div>
+
         <div class="mt-14">
             <button  id='add_item' onclick="insert()" name='add_item' type="button" class="btn btn-outline-warning" style="font-size: 25px;font-weight: bolder;">
                 Add to cart<i class="fas fa-shopping-cart"></i>
@@ -36,7 +34,7 @@
             <input class="form-control mt-4" type="text" placeholder="Last Name" id="customer-last-name" />
             <input class="form-control mt-4" type="text" placeholder="Customer Id" id="customer-id" />
             <button class="btn btn-success mt-4 w-100" onclick="change_values()" id="info_submit">Submit</button>
-          </div>
+        </div>
     </div>
 </div>
 
@@ -70,12 +68,12 @@
                         $('#get-info').toggle();
                     });
                 }
-                else if(res.message == 'trans_error'){
-                    frappe.msgprint('Failed to add!')
-                }
-                else {
-                    frappe.msgprint('Item Added to Cart!')
-                }
+                // else if(res.message == 'trans_error'){
+                //     frappe.msgprint('Failed to add!')
+                // }
+                // else {
+                //     frappe.msgprint('Item Added to Cart!')
+                // }
             }
         });
     }

@@ -19,6 +19,8 @@ var calculate_total_rate_and_quantity = function(frm){
 }
 
 frappe.ui.form.on('Sales Invoice', {
+
+	
 	
 	onload: function(frm) {
 		if (!frm.doc.total_quantity){

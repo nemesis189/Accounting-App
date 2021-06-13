@@ -11,6 +11,7 @@
                     <th scope="col">Rate</th>
                     <th scope="col">Quantity</th>
                     <th scope="col">Total</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             
@@ -23,8 +24,16 @@
                         <td>{{ item_list[item]['rate'] }}</td>
                         <td>{{ item_list[item]['quantity'] }}</td>
                         <td>{{ item_list[item]['total'] }}</td>
+                        <td>
+                            <button  id='del_item' onclick="deleteItem('{{ item }}') "
+                                name='add_item' type="button" class="btn btn-outline-danger" 
+                                style="font-size: 15px;font-weight: bolder;">
+                                Delete
+                            </button>
+                        </td>
                     </tr>
                 {% endfor %}
+
                 <tr style="font-size: 30px;">
                     <th scope="row"></th>
                     <td></td>
@@ -38,7 +47,7 @@
 
                     
         <div class="mt-20">
-            <button  id='add_item' onclick="purchase_items()" name='add_item' type="button" class="btn btn-outline-danger" style="font-size: 35px;font-weight: bolder;">
+            <button  id='add_item' onclick="purchase_items()" name='add_item' type="button" class="btn btn-outline-success" style="font-size: 35px;font-weight: bolder;">
                 Purchase Cart Items<i class="fas fa-shopping-cart"></i>
             </button>
         </div>
@@ -54,7 +63,6 @@
 <script>
 
     function purchase_items(){
-
         frappe.confirm('Are you sure you want to proceed?',
             () => {
                 frappe.call({
@@ -73,6 +81,25 @@
             }, () => {
                 return;
             });
-       
     }
+
+    function deleteItem( name){
+        frappe.call({
+                    method: 'financemod.www.cart.delete_item',
+                    args: {
+                        // 'item_code': code,
+                        'item_name': name
+                    },
+
+                    callback: function(res) {
+                        if( res.message == 'error'){
+                            frappe.throw("Transaction Failed! :(")
+                        }
+                        else{
+                            
+                        }
+                    }
+                });
+            }
+    
 </script>

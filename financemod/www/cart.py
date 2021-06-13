@@ -17,6 +17,7 @@ def get_context(context):
 	cust_name = check_customer(customer)
 	
 	si,si_doc = find_drafted_si(cust_name)
+	print('SI, SIDOC:::::::::',si,si_doc)
 
 	context.item_list = get_items(si)
 
@@ -62,19 +63,20 @@ def get_items(si):
 	n =  [ x['item_name'] for x in items ]
 	names = str(n).replace('[','(').replace(']',')')
 
-	item_names = frappe.db.sql(''' SELECT  name,item_name, item_image from `tabItem` 
+	item_names = frappe.db.sql(''' SELECT name,item_name, item_image, item_code from `tabItem` 
 									WHERE name in {names} '''
 								.format(names=names), as_dict=True)
-	item_list = {x['item_name']:{'rate':0.0, 'quantity':0.0, 'total':0.0, 'image':''} for x in item_names}
+	item_list = {x['item_name']:{'rate':0.0, 'quantity':0.0, 'total':0.0, 'image':'', 'item_code':''} for x in item_names}
 
 	for x in item_names:
 		for y in items:
 			if x['name'] == y['item_name']:
 				d = {}
 				key = x['item_name']
-				d[key] = {'rate':y['rate'], 'quantity':y['quantity'], 'total':y['total'], 'image':x['item_image']}
+				d[key] = {'rate':y['rate'], 'quantity':y['quantity'], 'total':y['total'], 'image':x['item_image'], 'item_code':x['item_code']}
 				item_list[key] = update_cart_item(item_list[key],d[key])
 	return item_list
+
 
 @frappe.whitelist()
 def submit_si():
@@ -86,3 +88,17 @@ def submit_si():
 		return 'error'
 	
 	return 'submitted'
+
+
+@frappe.whitelist()
+def delete_item( item_name):
+	cust_name = check_customer(customer)
+	si,sales_inv = find_drafted_si(cust_name)
+	frappe.db.sql(f''' DELETE from `tabSales Invoice Item` WHERE item_name = "{item_name}" 
+						AND parent = "{si.name}"
+						AND parenttype = "{sales_inv.doctype}" 
+						AND docstatus = 0 ''')
+	# sales_inv.save(ignore_permissions=True)
+	return
+
+

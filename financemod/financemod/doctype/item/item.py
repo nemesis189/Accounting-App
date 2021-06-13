@@ -20,38 +20,51 @@ def clickmethod(customer,quantity,item):
 	if customer is None:
 		return 'error'
 
-	si = find_drafted_si(customer)
+	si,si_doc = find_drafted_si(customer)
+	print('SI_1, SIDOC_1 :::::::::',si,si_doc)
+
 
 	cart = {'item_name': item_name['name'], 'rate': item_dict['rate'], 'quantity':quantity, 'total':total}
+	idx = 1
+	# try:
+	if not si:
+		idx += 1
+		doc = frappe.get_doc({
+			'doctype' : 'Sales Invoice',
+			'series' : 'ACC-SINV-.YYYY.-',
+			'item' : [ cart ],
+			'customer' : customer,
+			'total_quantity' : cart['quantity'],
+			'total_rate' : cart['total'],
+		})
+		doc.save(ignore_permissions = True)
 
-	try:
-		if not si:
-			doc = frappe.get_doc({
-				'doctype' : 'Sales Invoice',
-				'series' : 'ACC-SINV-.YYYY.-',
-				'item' : [ cart ],
-				'customer' : customer
-			})
-			doc.save()
+	else:
+		idx+=1
+		print('INSIDE HERRREEEEEEE::::::::',si_doc.docstatus, si_doc.name)
+		si_item_fields = {
+			'doctype': 'Sales Invoice Item',
+			'docstatus' : si_doc.docstatus,
+			'parent' : si_doc.name,
+			'parentfield' : 'item',
+			'parenttype' : 'Sales Invoice',
+			'idx' : idx
+			
+		}
 
-		else:
-			si_item_fields = {
-				'doctype': 'Sales Invoice Item',
-				'docstatus' : si.docstatus,
-				'parent' : si.name,
-				'parentfield' : 'item',
-				'parenttype' : 'Sales Invoice',
-			}
+		si_item_fields.update(cart)
 
-			si_item_fields.update(cart)
-			si_item = frappe.get_doc(si_item_fields)
-			si_item.save()
+		si_item = frappe.get_doc(si_item_fields)
+		
+		print('BEFORE::::::::',si_doc.total_rate)
+		si_doc.total_rate = float(si_doc.total_rate) + float(cart['total'])
+		print('AFTER::::::::',si_doc.total_rate)
+
+		si_doc.total_quantity = float(si_doc.total_quantity) + float(cart['quantity'])
+		si_doc.save(ignore_permissions = True)
+		si_item.save(ignore_permissions = True)
 	
-	except:
-		return 'trans_error'
-
-
-	return 'success'
+	return
 
 @frappe.whitelist()
 def check_customer(customer):
@@ -66,7 +79,7 @@ def check_customer(customer):
 
 @frappe.whitelist()
 def insert_customer(fname,lname,cid):
-	print(fname,lname,cid)
+	# print(fname,lname,cid)
 	customer = frappe.get_doc({
 		'doctype':'Customer',
 		'first_name':fname,
@@ -74,7 +87,7 @@ def insert_customer(fname,lname,cid):
 		'customer_id':cid
 	})
 	# customer.save()
-	customer.insert()
+	customer.insert(ignore_permissions = True)
 	return 1
 
 
@@ -86,7 +99,10 @@ def find_drafted_si(customer):
 		WHERE customer = '{customer}'
 		AND docstatus = 0
 	''', as_dict=True)
-	return si[0] if si else None
+	if si:
+		si_doc = frappe.get_doc('Sales Invoice', si[0]['name'])
+		return si[0],si_doc 
+	return None,None
 
 	
 

@@ -12,9 +12,9 @@ class SalesInvoice(Document):
 
 		for j in range(len(self.item)):
 			if self.item[j].credit_to in item_accounts:
-				item_accounts[self.item[j].credit_to] += int(self.item[j].total)
+				item_accounts[self.item[j].credit_to] += float(self.item[j].total)
 			else:
-				item_accounts.update({self.item[j].credit_to : int(self.item[j].total)})
+				item_accounts.update({self.item[j].credit_to : float(self.item[j].total)})
 		return item_accounts
 
 	def enable_is_cancel(self):
@@ -80,6 +80,19 @@ class SalesInvoice(Document):
 		})
 		doc.insert()
 		self.reload()
+
+	def before_submit(self):
+		#totals validation
+		error = 'in the Sales Invoice is incorrect!'
+		if self.total_quantity != sum([float(item.quantity) for item in self.item]):
+			error = 'Total Quantity ' + error
+
+		if self.total_rate != sum([float(item.total) for item in self.item]):
+			error = 'Total Rate ' + error
+
+		if error != 'in the Sales Invoice is incorrect!':
+			frappe.throw(frappe._(error))
+
 
 	def on_submit(self):
 		self.create_gl_entry(0)
