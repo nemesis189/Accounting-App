@@ -56,11 +56,11 @@ def clickmethod(customer,quantity,item):
 
 		si_item = frappe.get_doc(si_item_fields)
 		
-		print('BEFORE::::::::',si_doc.total_rate)
-		si_doc.total_rate = float(si_doc.total_rate) + float(cart['total'])
-		print('AFTER::::::::',si_doc.total_rate)
+		# print('BEFORE::::::::',si_doc.total_rate)
+		# si_doc.total_rate = float(si_doc.total_rate) + float(cart['total'])
+		# print('AFTER::::::::',si_doc.total_rate)
 
-		si_doc.total_quantity = float(si_doc.total_quantity) + float(cart['quantity'])
+		# si_doc.total_quantity = float(si_doc.total_quantity) + float(cart['quantity'])
 		si_doc.save(ignore_permissions = True)
 		si_item.save(ignore_permissions = True)
 	
