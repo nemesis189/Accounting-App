@@ -7,6 +7,7 @@ import frappe
 import unittest
 
 class TestSalesInvoice(unittest.TestCase):
+	si_doc = None
 	def setUp(self):
 		if not frappe.db.exists('Item',{'item_code':'cont111'}):
 			create_test_item(item_code='cont111',item_name='Container1',rate='10',def_uom='units')
@@ -14,19 +15,29 @@ class TestSalesInvoice(unittest.TestCase):
 		if not frappe.db.exists('Customer', {'customer_id':'test123'}):
 			create_test_customer(cust_id='test123', fname='Test', lname='Customer')
 		self.customer = frappe.db.get_value('Customer', {'customer_id':'test123'}, 'name')
-
-
-	def test_sales_invoice_total_quantity_and_rate(self):
 		item = [
 			{'item_name': 'Container1', 'rate': '10', 'quantity':'100', 'total':'1000'},
 		]
-		si_doc = create_si(item,self.customer)
+		self.si_doc = create_si(item,self.customer)
 
-		self.assertEqual(frappe.get_value("Sales Invoice",si_doc.name,"total_quantity"),100.0)
-		self.assertEqual(frappe.get_value("Sales Invoice",si_doc.name,"total_rate"),1000.0)
 
+	def test_sales_invoice_total_quantity_and_rate(self):
+		self.assertEqual(frappe.get_value("Sales Invoice",self.si_doc.name,"total_quantity"),100.0)
+		self.assertEqual(frappe.get_value("Sales Invoice",self.si_doc.name,"total_rate"),1000.0)
+	
+	def test_if_sales_inv_gle_cr_db_are_equal(self):
+		gle_docs = frappe.get_list('GL Entry', fields=['credit_amount','debit_amount'], filters={'voucher_no':self.si_doc.name})
+		total_credit = sum([ gle.credit_amount for gle in gle_docs ])
+		total_debit = sum([ gle.debit_amount for gle in gle_docs ])
+
+		self.assertEqual(total_credit,total_debit)
+		
+		
 	
 	def tearDown(self):
+		self.si_doc.cancel()
+		for i in range(4):
+			delete_test_doc('GL Entry', 'voucher_no',self.si_doc.name)
 		delete_test_doc('Sales Invoice','customer',self.customer)
 		delete_test_doc('Item','item_code','cont111')
 		delete_test_doc('Customer','customer_id','test123')
@@ -40,6 +51,7 @@ def create_si(item,name):
 		'customer' : name,
 	})
 	doc.save()
+	doc.submit()
 	return doc
 
 def create_test_item(**args):
@@ -60,9 +72,6 @@ def create_test_customer(**args):
 		'first_name':args.fname,
 		'last_name':args.lname
 	}).insert()
-
-
-
 
 def delete_test_doc(dt, id_name, id):
 	if frappe.db.exists(dt, {id_name:id}):

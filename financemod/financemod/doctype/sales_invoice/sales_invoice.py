@@ -31,13 +31,14 @@ class SalesInvoice(Document):
 
 	def create_gl_entry(self,cancel_entry):
 		item_accounts = self.get_item_accounts()
+		doc_list = []
 
 		#create entries for cred accounts			
 		for  ac,am in item_accounts.items():
 			acct = ac
 			acct_against = self.debit_to
 			cred_amount = am
-			debt_amount = 0
+			debt_amount = 0.0
 			is_cancel = False 
 			# is_credit = False
 
@@ -62,7 +63,7 @@ class SalesInvoice(Document):
 				'voucher_no':self.name,
 				'is_cancelled':is_cancel,
 			})
-			doc.insert()
+			doc_list.append(doc)
 
 		#for debiting payment from account
 		doc = frappe.get_doc({
@@ -71,18 +72,31 @@ class SalesInvoice(Document):
 				'posting_time':self.posting_time,
 				'posting_due_date': self.posting_due_date,
 				'account': self.debit_to,
-				'credit_amount': sum([float(b) for a,b in item_accounts.items()]) if is_cancel else 0,
-				'debit_amount': 0 if is_cancel else sum([float(b) for a,b in item_accounts.items()]) ,
+				'credit_amount': sum([float(b) for a,b in item_accounts.items()]) if is_cancel else 0.0,
+				'debit_amount': 0.0 if is_cancel else sum([float(b) for a,b in item_accounts.items()]) ,
 				'against': ' ,'.join(list(a for a,b in item_accounts.items())),
 				'voucher_type':self.doctype,
 				'voucher_no':self.name,
 				'is_cancelled': True if cancel_entry else False,
 		})
-		doc.insert()
+		doc_list.append(doc)
+		self.gl_entry_cr_db_validation(doc_list)
 		self.reload()
+	
+	def gl_entry_cr_db_validation(self,doc_list):
+		total_credit = sum(float(doc.credit_amount) for doc in doc_list)
+		total_debit = sum(float(doc.debit_amount) for doc in doc_list)
+
+		if total_credit != total_debit:
+			frappe.throw(frappe._('Total credit and debit does not match in GL Entry'))
+		else:
+			for doc in doc_list:
+				doc.insert()
+		
+
 
 	def before_submit(self):
-		#totals validation
+		#invoice totals validation
 		error = 'in the Sales Invoice is incorrect!'
 		if self.total_quantity != sum([float(item.quantity) for item in self.item]):
 			error = 'Total Quantity ' + error
@@ -92,6 +106,8 @@ class SalesInvoice(Document):
 
 		if error != 'in the Sales Invoice is incorrect!':
 			frappe.throw(frappe._(error))
+		
+
 
 	def before_save(self):
 		self.total_quantity = sum([ float(item.quantity) for item in self.item]) or 0.0
