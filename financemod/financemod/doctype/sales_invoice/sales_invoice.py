@@ -94,8 +94,8 @@ class SalesInvoice(Document):
 			frappe.throw(frappe._(error))
 
 	def before_save(self):
-		self.total_quantity = sum([ float(item['quantity']) for item in self.item]) or 0.0
-		self.total_rate = sum([ float(item['total']) for item in self.item]) or 0.0
+		self.total_quantity = sum([ float(item.quantity) for item in self.item]) or 0.0
+		self.total_rate = sum([ float(item.total) for item in self.item]) or 0.0
 
 	def on_submit(self):
 		self.create_gl_entry(0)
